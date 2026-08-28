@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Hash">
+	<circle cx="256" cy="256" r="256" fill="#F4F4F5"/>
+	<g fill="none" stroke="#231F20" stroke-width="42" stroke-linecap="round">
+		<line x1="171" y1="205" x2="341" y2="205"/>
+		<line x1="171" y1="301" x2="341" y2="301"/>
+		<line x1="249" y1="133" x2="207" y2="379"/>
+		<line x1="327" y1="133" x2="285" y2="379"/>
+	</g>
+</svg>

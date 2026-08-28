@@ -1,0 +1,14 @@
+{
+	"node": "n8n-nodes-base.hash",
+	"nodeVersion": "1.0",
+	"codexVersion": "1.0",
+	"categories": ["Development", "Utility"],
+	"resources": {
+		"primaryDocumentation": [
+			{ "url": "https://github.com/NajiElKotob/n8n-nodes-hash?tab=readme-ov-file" }
+		],
+		"credentialDocumentation": [
+			{ "url": "https://github.com/NajiElKotob/n8n-nodes-hash?tab=readme-ov-file#pepper" }
+		]
+	}
+}
