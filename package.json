@@ -1,6 +1,6 @@
 {
 	"name": "n8n-nodes-hash",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"description": "Hash text, files and JSON in n8n with algorithms the built-in Crypto node does not offer, including SHA1, BLAKE2, RIPEMD-160, SM3 and CRC32, plus base64url output and optional salt and pepper.",
 	"license": "MIT",
 	"homepage": "https://github.com/NajiElKotob/n8n-nodes-hash",
