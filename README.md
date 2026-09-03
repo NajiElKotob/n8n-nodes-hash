@@ -24,6 +24,7 @@ Settings → Community nodes → Install → `n8n-nodes-hash`
 | Algorithm       | One of 14, see below                                                                       |
 | Salt            | Optional value joined to the input before hashing                                          |
 | Salt Position   | `Prefix` or `Suffix`. Appears once a salt is entered.                                      |
+| Pepper Secret   | Optional HMAC key. Masked in the interface but stored in the workflow.                     |
 
 ### Algorithms
 
@@ -53,7 +54,9 @@ The input item passes through unchanged, with the hash added as a new field. Bin
 
 ## Pepper
 
-A **pepper** is a single secret shared across every hash the node produces, unlike a salt which varies per record. It lives in the **Hash Pepper API** credential rather than in a node parameter, because parameters are stored inside the workflow and travel with every export, and a pepper in an exported workflow is no longer secret.
+A **pepper** is a single secret shared across every hash the node produces, unlike a salt which varies per record. It is set in the **Pepper Secret** field, which is masked in the interface.
+
+Masked is not the same as encrypted. The value is stored in the workflow like any other parameter, so it appears in workflow exports, in backups, and in version control if you commit workflows. Treat an exported workflow containing a pepper as a secret in its own right. If that is not acceptable for your use case, use a salt stored alongside your data instead, and accept the weaker guarantee.
 
 When a pepper is set, the node switches from `createHash` to `createHmac`. This is deliberate: `hash(pepper + value)` is vulnerable to length-extension attacks on MD5, SHA1 and SHA-256, and HMAC exists to solve exactly that. The pepper is never written to the output, even with Include Metadata switched on.
 
@@ -62,6 +65,8 @@ Changing the pepper invalidates every hash produced with the previous one. There
 ## Security notes
 
 **MD5, SHA1 and CRC32 are here for compatibility, not security.** MD5 and SHA1 both have practical collision attacks. CRC32 is not a hash function at all. Use them for checksums, cache keys and legacy API signatures, and nothing else.
+
+**The pepper is stored in the workflow.** See the Pepper section above. It is masked in the interface, not encrypted at rest.
 
 **A salt does not make a fast hash safe for passwords.** SHA-256 is designed to be fast, and commodity hardware tries billions of candidates per second whether or not a salt is present. Salting protects against precomputed rainbow tables, and that is all it does. For passwords, use a deliberately slow key derivation function such as scrypt, bcrypt or Argon2. This node does not currently offer one.
 
@@ -75,7 +80,7 @@ Changing the pepper invalidates every hash produced with the previous one. There
 
 **Pseudonymize personal data.** Hash an email address with a salt so records can still be joined across systems without storing the address itself. Store the salt with the data, or the hashes can never be reproduced.
 
-**Legacy API signatures.** Some payment and telecom APIs still require SHA1 or an HMAC over a concatenated parameter string. Set the algorithm to SHA1 and put the shared secret in the pepper credential.
+**Legacy API signatures.** Some payment and telecom APIs still require SHA1 or an HMAC over a concatenated parameter string. Set the algorithm to SHA1 and put the shared secret in the pepper Secret field.
 
 ## Compatibility
 
@@ -90,7 +95,11 @@ RIPEMD-160 and SM3 depend on the OpenSSL build behind your n8n instance. On the 
 
 ## Version history
 
-**0.1.0** — Initial release. 14 algorithms, three input types, hex/base64/base64url encoding, salt with position, optional pepper via HMAC, truncation, and optional metadata output.
+**0.1.3** — Pepper moved from a credential to a masked node parameter.
+
+**0.1.2** — Contactable author email in package metadata.
+
+**0.1.1** — Initial release. 14 algorithms, three input types, hex/base64/base64url encoding, salt with position, optional pepper via HMAC, truncation, and optional metadata output.
 
 ## License
 

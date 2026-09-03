@@ -1,9 +1,6 @@
 import { createHash, createHmac, getHashes } from "node:crypto";
 import type {
-  ICredentialsDecrypted,
-  ICredentialTestFunctions,
   IExecuteFunctions,
-  INodeCredentialTestResult,
   INodeExecutionData,
   INodeType,
   INodeTypeDescription,
@@ -121,13 +118,6 @@ export class Hash implements INodeType {
     inputs: [NodeConnectionTypes.Main],
     outputs: [NodeConnectionTypes.Main],
     usableAsTool: true,
-    credentials: [
-      {
-        name: "hashPepperApi",
-        required: false,
-        testedBy: "hashPepperTest",
-      },
-    ],
     properties: [
       {
         displayName: "Input Type",
@@ -232,6 +222,17 @@ export class Hash implements INodeType {
         },
       },
       {
+        displayName: "Pepper Secret",
+        name: "pepperSecret",
+        type: "string",
+        typeOptions: {
+          password: true,
+        },
+        default: "",
+        description:
+          "Optional secret applied through HMAC rather than plain concatenation. Unlike a salt it is one shared secret and it is never written to the output. It is stored inside the workflow, so treat exported workflows as sensitive.",
+      },
+      {
         displayName: "Options",
         name: "options",
         type: "collection",
@@ -291,40 +292,9 @@ export class Hash implements INodeType {
     ],
   };
 
-  methods = {
-    credentialTest: {
-      async hashPepperTest(
-        this: ICredentialTestFunctions,
-        credential: ICredentialsDecrypted,
-      ): Promise<INodeCredentialTestResult> {
-        const pepperSecret = (credential.data?.pepperSecret as string) ?? "";
-
-        if (pepperSecret === "") {
-          return {
-            status: "Error",
-            message:
-              "The pepper is empty, so hashes would be produced as if no pepper were set",
-          };
-        }
-
-        return { status: "OK", message: "Pepper is set" };
-      },
-    },
-  };
-
   async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
     const items = this.getInputData();
     const returnData: INodeExecutionData[] = [];
-
-    // The pepper credential is optional, and getCredentials throws when none is
-    // attached, so absence is treated as "no pepper" rather than an error.
-    let pepper = "";
-    try {
-      const credentials = await this.getCredentials("hashPepperApi");
-      pepper = (credentials?.pepperSecret as string) ?? "";
-    } catch {
-      pepper = "";
-    }
 
     for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
       try {
@@ -337,6 +307,11 @@ export class Hash implements INodeType {
           itemIndex,
         ) as string;
         const salt = this.getNodeParameter("salt", itemIndex, "") as string;
+        const pepper = this.getNodeParameter(
+          "pepperSecret",
+          itemIndex,
+          "",
+        ) as string;
         const saltPosition = this.getNodeParameter(
           "saltPosition",
           itemIndex,
